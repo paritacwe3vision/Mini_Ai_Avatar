@@ -1,0 +1,9 @@
+.main-layout {
+    flex: 1;
+    display: flex;
+    background: #0f172a;
+}
+
+.main-layout > * {
+    flex: 1;
+}

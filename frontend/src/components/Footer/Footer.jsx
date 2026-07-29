@@ -28,27 +28,6 @@ export default function Footer() {
 
       </div>
 
-      <div className="footer-right">
-
-        <input
-          type="text"
-          placeholder="Type message..."
-        />
-
-        <button>
-
-          ➤
-
-        </button>
-
-        <button>
-
-          🎤
-
-        </button>
-
-      </div>
-
     </footer>
   );
 }

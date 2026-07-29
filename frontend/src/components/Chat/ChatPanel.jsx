@@ -14,9 +14,9 @@ export default function ChatPanel() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-  
+
     const userText = input;
-  
+
     setMessages((prev) => [
       ...prev,
       {
@@ -24,9 +24,9 @@ export default function ChatPanel() {
         text: userText,
       },
     ]);
-  
+
     setInput("");
-  
+
     try {
       const res = await axios.post(
         "http://127.0.0.1:8000/chat",
@@ -34,7 +34,7 @@ export default function ChatPanel() {
           message: userText,
         }
       );
-  
+
       setMessages((prev) => [
         ...prev,
         {
@@ -42,7 +42,9 @@ export default function ChatPanel() {
           text: res.data.reply,
         },
       ]);
+
     } catch (err) {
+
       setMessages((prev) => [
         ...prev,
         {
@@ -50,49 +52,127 @@ export default function ChatPanel() {
           text: "Backend is not running.",
         },
       ]);
-  
+
       console.error(err);
     }
   };
 
+
+  // 🎤 Speech To Text Function
+  const startListening = () => {
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser");
+      return;
+    }
+
+
+    const recognition = new SpeechRecognition();
+
+
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+
+    recognition.start();
+
+
+    recognition.onstart = () => {
+      console.log("Listening...");
+    };
+
+
+    recognition.onresult = (event) => {
+
+      const speechText =
+        event.results[0][0].transcript;
+
+
+      setInput(speechText);
+
+    };
+
+
+    recognition.onerror = (event) => {
+      console.log("Speech error:", event.error);
+    };
+
+  };
+
+
   return (
     <section className="chat-panel">
+
       <div className="chat-card">
+
 
         <div className="chat-header">
           💬 AI Assistant
         </div>
 
+
         <div className="chat-messages">
+
           {messages.map((msg, index) => (
+
             <div
               key={index}
               className={`message ${msg.sender}`}
             >
               {msg.text}
             </div>
+
           ))}
+
         </div>
 
+
+
         <div className="chat-input">
+
+
+          <button
+            className="mic-button"
+            onClick={startListening}
+          >
+            🎤
+          </button>
+
 
           <input
             type="text"
             placeholder="Type your message..."
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) =>
+              setInput(e.target.value)
+            }
             onKeyDown={(e) => {
-              if (e.key === "Enter") sendMessage();
+
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+
             }}
           />
+
+
 
           <button onClick={sendMessage}>
             Send
           </button>
 
+
         </div>
 
+
       </div>
+
     </section>
   );
 }

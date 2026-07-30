@@ -1,32 +1,142 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./ChatPanel.css";
 import axios from "axios";
+import HistoryPanel from "./HistoryPanel";
+import { useAvatar } from "../../avatar/AvatarContext";
 
 export default function ChatPanel() {
-  const [messages, setMessages] = useState([
+
+  const {
+    setAnimation,
+    playThinking,
+    playTalking,
+    playIdle,
+  } = useAvatar();
+
+  //------------------------------------------------
+  // Default Chat
+  //------------------------------------------------
+
+  const defaultMessages = [
     {
       sender: "ai",
       text: "Hello! I am your AI Avatar. How can I help you today?",
     },
-  ]);
+  ];
 
+  //------------------------------------------------
+  // States
+  //------------------------------------------------
+
+  const [messages, setMessages] = useState(defaultMessages);
   const [input, setInput] = useState("");
+
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState(null);
+
+  const bottomRef = useRef(null);
+
+  //------------------------------------------------
+  // Load History
+  //------------------------------------------------
+
+  useEffect(() => {
+    const savedHistory =
+      JSON.parse(localStorage.getItem("chatHistory")) || [];
+
+    setHistory(savedHistory);
+  }, []);
+
+  //------------------------------------------------
+  // Auto Scroll
+  //------------------------------------------------
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  //------------------------------------------------
+  // Save Conversation
+  //------------------------------------------------
+
+  const saveConversation = (chatMessages) => {
+
+    if (chatMessages.length <= 1) return;
+
+    let updatedHistory = [...history];
+
+    if (currentChatId === null) {
+
+      const newConversation = {
+        id: Date.now(),
+
+        title:
+          chatMessages.find((m) => m.sender === "user")?.text.substring(0, 30) ||
+          "New Chat",
+
+        date: new Date().toLocaleString(),
+
+        messages: chatMessages,
+      };
+
+      updatedHistory.unshift(newConversation);
+
+      setCurrentChatId(newConversation.id);
+
+    } else {
+
+      updatedHistory = updatedHistory.map((chat) => {
+
+        if (chat.id === currentChatId) {
+
+          return {
+            ...chat,
+            messages: chatMessages,
+          };
+
+        }
+
+        return chat;
+
+      });
+
+    }
+
+    setHistory(updatedHistory);
+
+    localStorage.setItem(
+      "chatHistory",
+      JSON.stringify(updatedHistory)
+    );
+
+  };
+
+  //------------------------------------------------
+  // Send Message
+  //------------------------------------------------
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-
+  
     const userText = input;
-
-    setMessages((prev) => [
-      ...prev,
+  
+    const updatedMessages = [
+      ...messages,
       {
         sender: "user",
         text: userText,
       },
-    ]);
-
+    ];
+  
+    setMessages(updatedMessages);
     setInput("");
-
+  
+    // Avatar starts thinking
+    setAnimation("Thinking");
+  
     try {
       const res = await axios.post(
         "http://127.0.0.1:8000/chat",
@@ -34,88 +144,164 @@ export default function ChatPanel() {
           message: userText,
         }
       );
-
-      setMessages((prev) => [
-        ...prev,
+  
+      const finalMessages = [
+        ...updatedMessages,
         {
           sender: "ai",
           text: res.data.reply,
         },
-      ]);
-
+      ];
+  
+      setMessages(finalMessages);
+  
+      saveConversation(finalMessages);
+  
+      // Back to idle
+      setAnimation("Idle");
     } catch (err) {
-
-      setMessages((prev) => [
-        ...prev,
+      const finalMessages = [
+        ...updatedMessages,
         {
           sender: "ai",
           text: "Backend is not running.",
         },
-      ]);
-
+      ];
+  
+      setMessages(finalMessages);
+  
+      saveConversation(finalMessages);
+  
+      // Back to idle
+      setAnimation("Idle");
+  
       console.error(err);
     }
   };
 
+  //------------------------------------------------
+  // Speech To Text
+  //------------------------------------------------
 
-  // 🎤 Speech To Text Function
   const startListening = () => {
 
     const SpeechRecognition =
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
 
-
     if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser");
-      return;
-    }
 
+      alert("Speech Recognition is not supported.");
+
+      return;
+
+    }
 
     const recognition = new SpeechRecognition();
 
-
     recognition.lang = "en-US";
+
     recognition.continuous = false;
+
     recognition.interimResults = false;
 
-
     recognition.start();
-
-
-    recognition.onstart = () => {
-      console.log("Listening...");
-    };
-
 
     recognition.onresult = (event) => {
 
       const speechText =
         event.results[0][0].transcript;
 
-
       setInput(speechText);
 
     };
 
-
     recognition.onerror = (event) => {
-      console.log("Speech error:", event.error);
+
+      console.log(event.error);
+
     };
 
   };
 
+  //------------------------------------------------
+  // New Chat
+  //------------------------------------------------
+
+  const startNewChat = () => {
+
+    setMessages(defaultMessages);
+
+    setCurrentChatId(null);
+
+    setShowHistory(false);
+
+    setAnimation("Idle");
+
+  };
+
+  //------------------------------------------------
+  // Load Conversation
+  //------------------------------------------------
+
+  const loadConversation = (chat) => {
+
+    setMessages(chat.messages);
+
+    setCurrentChatId(chat.id);
+
+    setShowHistory(false);
+
+  };
+
+  //------------------------------------------------
+  // Delete Conversation
+  //------------------------------------------------
+
+  const deleteConversation = (id) => {
+
+    const updated =
+      history.filter((chat) => chat.id !== id);
+
+    setHistory(updated);
+
+    localStorage.setItem(
+      "chatHistory",
+      JSON.stringify(updated)
+    );
+
+    if (currentChatId === id) {
+
+      startNewChat();
+
+    }
+
+  };
+
+  //------------------------------------------------
+  // UI
+  //------------------------------------------------
 
   return (
+
     <section className="chat-panel">
 
       <div className="chat-card">
 
-
         <div className="chat-header">
-          💬 AI Assistant
-        </div>
 
+          <div className="chat-title">
+            💬 AI Assistant
+          </div>
+
+          <button
+            className="history-btn"
+            onClick={() => setShowHistory(true)}
+          >
+            History
+          </button>
+
+        </div>
 
         <div className="chat-messages">
 
@@ -130,12 +316,11 @@ export default function ChatPanel() {
 
           ))}
 
+          <div ref={bottomRef}></div>
+
         </div>
 
-
-
         <div className="chat-input">
-
 
           <button
             className="mic-button"
@@ -143,7 +328,6 @@ export default function ChatPanel() {
           >
             🎤
           </button>
-
 
           <input
             type="text"
@@ -155,24 +339,35 @@ export default function ChatPanel() {
             onKeyDown={(e) => {
 
               if (e.key === "Enter") {
+
                 sendMessage();
+
               }
 
             }}
           />
 
-
-
-          <button onClick={sendMessage}>
+          <button
+            onClick={sendMessage}
+          >
             Send
           </button>
 
-
         </div>
-
 
       </div>
 
+      <HistoryPanel
+        showHistory={showHistory}
+        history={history}
+        loadConversation={loadConversation}
+        startNewChat={startNewChat}
+        deleteConversation={deleteConversation}
+        closeHistory={() => setShowHistory(false)}
+      />
+
     </section>
+
   );
+
 }

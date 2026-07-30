@@ -1,9 +1,25 @@
 .main-layout {
-    flex: 1;
     display: flex;
-    background: #0f172a;
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 120px);
 }
 
-.main-layout > * {
+.left-panel,
+.right-panel {
     flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 1000px) {
+
+    .main-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-panel,
+    .right-panel {
+        width: 100%;
+    }
 }

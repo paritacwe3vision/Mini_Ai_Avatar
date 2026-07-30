@@ -1,43 +1,53 @@
 import { Canvas } from "@react-three/fiber";
-import {
-  OrbitControls,
-  Environment,
-  ContactShadows,
-} from "@react-three/drei";
+import { Suspense } from "react";
+import { OrbitControls, Environment } from "@react-three/drei";
 
 import ReadyPlayerAvatar from "./ReadyPlayerAvatar";
 
+
 export default function Scene() {
+
   return (
     <Canvas
       camera={{
-        position: [0, 1.3, 3],
-        fov: 35,
+        position: [0, 1.5, 5],
+        fov: 45,
+      }}
+      style={{
+        width: "100%",
+        height: "100%",
       }}
     >
-      <ambientLight intensity={2} />
 
-      <directionalLight
-        position={[5, 5, 5]}
-        intensity={3}
-      />
+      <Suspense fallback={null}>
 
-      <ReadyPlayerAvatar />
+        {/* Lights */}
+        <ambientLight intensity={1.5} />
 
-      <ContactShadows
-        position={[0, -1.4, 0]}
-        opacity={0.5}
-        blur={2}
-        scale={10}
-      />
+        <directionalLight
+          position={[3, 5, 3]}
+          intensity={2}
+          castShadow
+        />
 
-      <Environment preset="city" />
 
-      <OrbitControls
-        enablePan={false}
-        minDistance={2}
-        maxDistance={5}
-      />
+        {/* Avatar */}
+        <ReadyPlayerAvatar />
+
+
+        {/* Environment */}
+        <Environment preset="studio" />
+
+
+        {/* Camera Control */}
+        <OrbitControls
+          target={[0, 1, 0]}
+          enableZoom={true}
+        />
+
+
+      </Suspense>
+
     </Canvas>
   );
 }

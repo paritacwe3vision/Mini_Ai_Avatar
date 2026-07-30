@@ -7,13 +7,18 @@ export default function AvatarPanel() {
       <div className="avatar-card">
 
         <div className="avatar-header">
-          🤖 AI Avatar
+          <div className="avatar-title">
+            🤖 AI Avatar
+          </div>
+
+          <div className="avatar-status">
+            <span className="status-dot"></span>
+            Online
+          </div>
         </div>
 
         <div className="avatar-body">
-
           <Scene />
-
         </div>
 
       </div>

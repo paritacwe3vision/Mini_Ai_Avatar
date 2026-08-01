@@ -67,3 +67,15 @@ pydantic
 # CORS
 # -------------------------
 starlette
+
+
+# mark down 
+
+react-markdown
+remark-gfm
+react-syntax-highlighter 
+
+# STT
+faster-whisper 
+python-multipart
+ av

@@ -5,11 +5,14 @@ from pydantic import BaseModel
 from services.memory_service import save_memory, search_memory
 from services.llm_service import generate_response
 
+from api.speech import router as speech_router
 
 app = FastAPI(
     title="Mini AI Avatar Backend"
 )
 
+# NEW
+app.include_router(speech_router)
 
 # -----------------------------
 # CORS Configuration
@@ -18,7 +21,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://localhost:5174"
     ],
     allow_credentials=True,
     allow_methods=["*"],

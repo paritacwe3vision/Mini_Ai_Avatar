@@ -36,7 +36,13 @@ export default function Scene({ emotion }) {
         />
 
         {/* Studio Environment */}
-        <Environment preset="studio" />
+      {/* <Environment preset="studio" /> */}
+
+      <hemisphereLight
+    intensity={1.2}
+    groundColor="#444"
+/>
+
 
         {/* Avatar */}
         <Mixamo emotion={emotion} />

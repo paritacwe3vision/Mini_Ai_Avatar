@@ -78,4 +78,4 @@ react-syntax-highlighter
 # STT
 faster-whisper 
 python-multipart
- av
+av

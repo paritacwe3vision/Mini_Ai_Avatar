@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls, Environment } from "@react-three/drei";
 
-import ReadyPlayerAvatar from "./ReadyPlayerAvatar";
+import Mixamo from "./Mixamo";
 
 export default function Scene() {
   return (
@@ -40,7 +40,7 @@ export default function Scene() {
 
 
         {/* Avatar */}
-        <ReadyPlayerAvatar />
+        <Mixamo />
 
 
         {/* Camera Controls */}

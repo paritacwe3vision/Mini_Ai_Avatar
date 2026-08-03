@@ -34,7 +34,7 @@ export default function Footer({ setEmotion }) {
             😡 Angry
           </button>
 
-          <button onClick={() => setEmotion("Speak")}>
+          <button onClick={() => setEmotion("Speaking")}>
             🗣 Speak
           </button>
 

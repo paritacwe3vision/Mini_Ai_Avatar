@@ -22,6 +22,7 @@ export default function Mixamo({ emotion = "Waving" }) {
   const thinking = useFBX("/animations/Thinking.fbx");
   const sad = useFBX("/animations/Sad.fbx");
   const angry = useFBX("/animations/Angry.fbx");
+  const speaking = useFBX("/animations/Speaking.fbx");
 
   const currentAction = useRef();
   // Rename animation
@@ -43,6 +44,9 @@ export default function Mixamo({ emotion = "Waving" }) {
   if (angry.animations.length > 0) {
     angry.animations[0].name = "Angry";
   }
+  if (speaking.animations.length > 0) {
+  speaking.animations[0].name = "Speaking";
+}
 
   // Attach animation to avatar
 const { actions } = useAnimations(
@@ -52,6 +56,7 @@ const { actions } = useAnimations(
     thinking.animations[0],
     sad.animations[0],
     angry.animations[0],
+    speaking.animations[0], 
   ],
   group
 );

@@ -1,28 +1,42 @@
 import "./Footer.css";
 
-export default function Footer() {
+export default function Footer({ setEmotion }) {
+
   return (
     <footer className="footer">
 
       <div className="footer-left">
 
         <div className="status-ready">
-
           🟢 Ready
-
         </div>
+
 
         <div className="emotion-list">
 
-          😊 Neutral
+          <button onClick={() => setEmotion("Waving")}>
+            👋 Neutral
+          </button>
 
-          😊 Happy
+          <button onClick={() => setEmotion("Happy")}>
+            😊 Happy
+          </button>
 
-          🤔 Think
+          <button onClick={() => setEmotion("Thinking")}>
+            🤔 Think
+          </button>
 
-          😢 Sad
+          <button onClick={() => setEmotion("Sad")}>
+            😢 Sad
+          </button>
 
-          🗣 Speak
+          <button onClick={() => setEmotion("Angry")}>
+            😡 Angry
+          </button>
+
+          <button onClick={() => setEmotion("Speak")}>
+            🗣 Speak
+          </button>
 
         </div>
 

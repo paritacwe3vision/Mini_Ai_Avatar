@@ -4,7 +4,7 @@ import { OrbitControls, Environment } from "@react-three/drei";
 
 import Mixamo from "./Mixamo";
 
-export default function Scene() {
+export default function Scene({ emotion }) {
   return (
     <Canvas
       shadows
@@ -38,21 +38,16 @@ export default function Scene() {
         {/* Studio Environment */}
         <Environment preset="studio" />
 
-
         {/* Avatar */}
-        <Mixamo />
-
+        <Mixamo emotion={emotion} />
 
         {/* Camera Controls */}
         <OrbitControls
           target={[0, 1.2, 0]}
           enablePan={false}
           enableZoom={true}
-
           minDistance={2.5}
           maxDistance={5}
-
-          // allow small vertical movement
           minPolarAngle={Math.PI / 3}
           maxPolarAngle={Math.PI / 1.8}
         />

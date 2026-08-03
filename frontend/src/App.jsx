@@ -1,8 +1,12 @@
+import { useState } from "react";
+
 import Header from "./components/Header/Header";
 import MainLayout from "./components/Layout/MainLayout";
 import Footer from "./components/Footer/Footer";
 
 function App() {
+  const [emotion, setEmotion] = useState("Waving");
+
   return (
     <div
       style={{
@@ -14,8 +18,10 @@ function App() {
       }}
     >
       <Header />
-      <MainLayout />
-      <Footer />
+
+      <MainLayout emotion={emotion} />
+
+      <Footer setEmotion={setEmotion} />
     </div>
   );
 }

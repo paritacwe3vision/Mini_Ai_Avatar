@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+//import { useRef, useEffect } from "react";
 import {
   useGLTF,
   useFBX,
@@ -22,6 +23,7 @@ export default function Mixamo({ emotion = "Waving" }) {
   const sad = useFBX("/animations/Sad.fbx");
   const angry = useFBX("/animations/Angry.fbx");
 
+  const currentAction = useRef();
   // Rename animation
   if (waving.animations.length > 0) {
     waving.animations[0].name = "Waving";
@@ -70,25 +72,28 @@ const { actions } = useAnimations(
   // Play Animation
   // ==========================
  useEffect(() => {
-
   if (!actions) return;
 
-  Object.values(actions).forEach((action)=>{
-    action.stop();
-  });
+  const nextAction = actions[emotion];
 
-  const action = actions[emotion];
-
-  if (!action) {
+  if (!nextAction) {
     console.log("Animation not found:", emotion);
     return;
   }
 
-  action.reset();
-  action.fadeIn(0.3);
-  action.play();
+  if (currentAction.current === nextAction) return;
 
+  nextAction.reset();
+  nextAction.enabled = true;
+  nextAction.setEffectiveWeight(1);
+  nextAction.fadeIn(0.3);
+  nextAction.play();
 
+  if (currentAction.current) {
+    currentAction.current.crossFadeTo(nextAction, 0.3, true);
+  }
+
+  currentAction.current = nextAction;
 }, [actions, emotion]);
 
   // ==========================

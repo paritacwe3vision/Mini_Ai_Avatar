@@ -319,8 +319,9 @@ def get_response_style(user_message: str):
 
 #     response = client.chat.completions.create(
 
-#         #model="meta-llama/llama-3.1-8b-instruct",
-#         model="deepseek/deepseek-chat-v3.1",
+#        
+          #model="deepseek/deepseek-r1:free",
+        
 
 #         temperature=0.5,
 

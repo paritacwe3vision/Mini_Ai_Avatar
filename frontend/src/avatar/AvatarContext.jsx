@@ -12,6 +12,7 @@ export function AvatarProvider({ children }) {
       value={{
         animation,
         setAnimation,
+
       }}
     >
       {children}

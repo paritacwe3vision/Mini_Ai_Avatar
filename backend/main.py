@@ -4,12 +4,22 @@ from pydantic import BaseModel
 
 from services.memory_service import save_memory, search_memory
 from services.llm_service import generate_response
+from services.tts_service import text_to_speech
 
 from api.speech import router as speech_router
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI(
     title="Mini AI Avatar Backend"
 )
+
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static",
+)
+
 
 # -----------------------------
 # Speech API
@@ -79,7 +89,7 @@ def chat(request: ChatRequest):
 
     reply = response["reply"]
     emotion = response["emotion"]
-
+    audio_file = text_to_speech(reply)
     # ----------------------------------------------------
     # 4. Save Conversation
     # ----------------------------------------------------
@@ -96,5 +106,6 @@ def chat(request: ChatRequest):
     return {
         "reply": reply,
         "emotion": emotion,
-        "memory": memories
+        "memory": memories,
+        "audio": f"/static/audio/{audio_file}"
     }

@@ -39,6 +39,8 @@ export default function ChatPanel() {
   const bottomRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
   //------------------------------------------------
   // Load History
   //------------------------------------------------
@@ -136,8 +138,52 @@ const sendMessage = async (customMessage = null) => {
     const avatarEmotion =
       emotionMap[res.data.emotion] || "Idle";
     
-    console.log("Backend Emotion:", res.data.emotion);
-    console.log("Avatar Animation:", avatarEmotion);
+    // ============================
+// Play TTS Audio
+// ============================
+
+if (res.data.audio) {
+
+    // Stop previous audio if it's still playing
+    if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+    }
+
+    // Create new audio object
+    audioRef.current = new Audio(
+        API_URL + res.data.audio
+    );
+
+    // Avatar starts speaking
+    audioRef.current.onplay = () => {
+        setAnimation("Speaking");
+    };
+
+    // Avatar returns to idle
+    audioRef.current.onended = () => {
+        setAnimation("Idle");
+    };
+
+    // Audio error
+    audioRef.current.onerror = (e) => {
+        console.error("Audio Error:", e);
+    };
+
+    // Play only if NOT muted
+    if (!isMuted) {
+
+        audioRef.current.play().catch((err) => {
+            console.error("Unable to play audio:", err);
+        });
+
+    }
+
+}
+
+// Debug
+console.log("Backend Emotion:", res.data.emotion);
+console.log("Avatar Animation:", avatarEmotion);
     
     // Remove thinking bubble
     const finalMessages = [
@@ -159,7 +205,7 @@ const sendMessage = async (customMessage = null) => {
     
     setIsThinking(false);
 
-
+/* 
 // Emotion duration
 const emotionDuration = {
   Happy: 10000,
@@ -198,7 +244,7 @@ if (avatarEmotion !== "Idle") {
       setAnimation("Idle");
 
     }, 10000);
-
+ */
     // // Emotion returned from backend
     // const emotion = res.data.emotion;
 
@@ -382,11 +428,37 @@ return (
           </button>
 
           <button
-            className="history-btn"
-            onClick={() => setShowHistory(true)}
-          >
-            🕘 History
-          </button>
+    className="history-btn"
+    onClick={() => {
+
+        const muted = !isMuted;
+
+        setIsMuted(muted);
+
+        console.log("Muted:", muted);
+
+        if (audioRef.current) {
+
+            if (muted) {
+
+                // Pause immediately
+                audioRef.current.pause();
+
+            } else {
+
+                // Resume speaking
+                audioRef.current.play().catch(err => {
+                    console.error(err);
+                });
+
+            }
+
+        }
+
+    }}
+>
+    {isMuted ? "🔇" : "🔊"}
+</button>
 
         </div>
 

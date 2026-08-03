@@ -4,6 +4,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from services.emotion_service import detect_emotion
+from services.emotion_rules import get_emotion_rules
+from services.prompt_builder import build_prompt
 
 # ============================================================
 # Load Environment Variables
@@ -271,64 +274,147 @@ def get_response_style(user_message: str):
 # Generate Response
 # ============================================================
 
-def generate_response(user_message, memories):
+# def generate_response(user_message, memories):
 
-    context = ""
+#     context = ""
+
+#     for memory in memories:
+
+#         context += f"""
+
+# Previous Conversation
+
+# User:
+# {memory["user_message"]}
+
+# Assistant:
+# {memory["assistant_response"]}
+
+# """
+
+#     response_style = get_response_style(user_message)
+#     user_prompt = f"""
+#     Relevant Previous Memory:
+
+#     {context if context else "None"}
+
+#     Current User Message:
+
+#     {user_message}
+
+#     Instructions:
+
+#     {response_style}
+
+#     Follow these rules strictly.
+
+#     - Answer naturally.
+#     - Answer the user's question first.
+#     - Never explain internal reasoning.
+#     - Never explain memory unless asked.
+#     - Don't repeat yourself.
+#     - Don't write more than necessary.
+#     - If a short answer is enough, stop after answering.
+#         """
+
+#     response = client.chat.completions.create(
+
+#         #model="meta-llama/llama-3.1-8b-instruct",
+#         model="deepseek/deepseek-chat-v3.1",
+
+#         temperature=0.5,
+
+#         max_tokens = 800 if "detailed" in response_style.lower() else 200,
+
+#          extra_body={
+#         "provider": {
+#             "sort": "throughput"
+#         }
+#     },
+    
+#         messages=[
+#             {
+#                 "role": "system",
+#                 "content": SYSTEM_PROMPT,
+#             },
+#             {
+#                 "role": "user",
+#                 "content": user_prompt,
+#             },
+#         ],
+#     )
+
+#     return response.choices[0].message.content.strip()
+
+def generate_response(user_message, memories):
+    
+    # ==========================================================
+    # 1. Detect Emotion
+    # ==========================================================
+
+    emotion_result = detect_emotion(user_message)
+
+    emotion = emotion_result["emotion"]
+
+    # ==========================================================
+    # 2. Get Emotion Rules
+    # ==========================================================
+
+    emotion_rules = get_emotion_rules(emotion)
+
+    # ==========================================================
+    # 3. Format Retrieved Memories
+    # ==========================================================
+
+    memory_list = []
 
     for memory in memories:
 
-        context += f"""
-
-Previous Conversation
-
+        memory_list.append(
+            f"""
 User:
 {memory["user_message"]}
 
 Assistant:
 {memory["assistant_response"]}
-
 """
+        )
+
+    # ==========================================================
+    # 4. Build Final Prompt
+    # ==========================================================
+
+    final_prompt = build_prompt(
+        user_input=user_message,
+        memory=memory_list,
+        emotion=emotion,
+        emotion_rules=emotion_rules,
+    )
+
+    # ==========================================================
+    # 5. Response Style
+    # ==========================================================
 
     response_style = get_response_style(user_message)
-    user_prompt = f"""
-    Relevant Previous Memory:
 
-    {context if context else "None"}
-
-    Current User Message:
-
-    {user_message}
-
-    Instructions:
-
-    {response_style}
-
-    Follow these rules strictly.
-
-    - Answer naturally.
-    - Answer the user's question first.
-    - Never explain internal reasoning.
-    - Never explain memory unless asked.
-    - Don't repeat yourself.
-    - Don't write more than necessary.
-    - If a short answer is enough, stop after answering.
-        """
+    # ==========================================================
+    # 6. Call LLM
+    # ==========================================================
 
     response = client.chat.completions.create(
 
-        #model="meta-llama/llama-3.1-8b-instruct",
         model="deepseek/deepseek-chat-v3.1",
 
         temperature=0.5,
 
-        max_tokens = 800 if "detailed" in response_style.lower() else 200,
+        max_tokens=800 if "detailed" in response_style.lower() else 200,
 
-         extra_body={
-        "provider": {
-            "sort": "throughput"
-        }
-    },
-    
+        extra_body={
+            "provider": {
+                "sort": "throughput"
+            }
+        },
+
         messages=[
             {
                 "role": "system",
@@ -336,9 +422,16 @@ Assistant:
             },
             {
                 "role": "user",
-                "content": user_prompt,
+                "content": final_prompt,
             },
         ],
     )
 
-    return response.choices[0].message.content.strip()
+    # ==========================================================
+    # 7. Return Reply + Emotion
+    # ==========================================================
+
+    return {
+        "reply": response.choices[0].message.content.strip(),
+        "emotion": emotion,
+    }

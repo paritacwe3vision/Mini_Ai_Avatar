@@ -11,11 +11,14 @@ app = FastAPI(
     title="Mini AI Avatar Backend"
 )
 
-# NEW
+# -----------------------------
+# Speech API
+# -----------------------------
+
 app.include_router(speech_router)
 
 # -----------------------------
-# CORS Configuration
+# CORS
 # -----------------------------
 
 app.add_middleware(
@@ -29,7 +32,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # -----------------------------
 # Request Model
 # -----------------------------
@@ -37,20 +39,15 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
-
-
 # -----------------------------
-# Home Route
+# Home
 # -----------------------------
 
 @app.get("/")
 def home():
-
     return {
         "message": "Mini AI Avatar Backend Running"
     }
-
-
 
 # -----------------------------
 # Chat API
@@ -61,31 +58,43 @@ def chat(request: ChatRequest):
 
     user_message = request.message
 
+    # ----------------------------------------------------
+    # 1. Retrieve Relevant Memories
+    # ----------------------------------------------------
 
-    # 1. Search previous memory from ChromaDB
-    memories = search_memory(
-        user_message
+    memories = search_memory(user_message)
+
+    # ----------------------------------------------------
+    # 2. Generate AI Response
+    # ----------------------------------------------------
+
+    response = generate_response(
+        user_message=user_message,
+        memories=memories
     )
 
+    # ----------------------------------------------------
+    # 3. Extract Reply & Emotion
+    # ----------------------------------------------------
 
-    # 2. Send prompt + memory to LLM
-    reply = generate_response(
-        user_message,
-        memories
-    )
+    reply = response["reply"]
+    emotion = response["emotion"]
 
+    # ----------------------------------------------------
+    # 4. Save Conversation
+    # ----------------------------------------------------
 
-    # 3. Store conversation back into memory
     save_memory(
-        user_message,
-        reply
+        user_message=user_message,
+        assistant_response=reply
     )
 
+    # ----------------------------------------------------
+    # 5. Return Response
+    # ----------------------------------------------------
 
     return {
-
         "reply": reply,
-
+        "emotion": emotion,
         "memory": memories
-
     }

@@ -134,9 +134,43 @@ const sendMessage = async (customMessage = null) => {
     ];
     setMessages(finalMessages);
     saveConversation(finalMessages);
-    // Avatar back to idle
-    setAnimation("Idle");
+
+    // Emotion returned from backend
+    const emotion = res.data.emotion;
+
+    // Play emotion animation
+    switch (emotion) {
+
+      case "happy":
+        setAnimation("Happy");
+        break;
+
+      case "sad":
+        setAnimation("Sad");
+        break;
+
+      case "angry":
+        setAnimation("Angry");
+        break;
+
+      case "thinking":
+        setAnimation("Thinking");
+        break;
+
+      default:
+        setAnimation("Idle");
+    }
+
+    // Stop thinking state
     setIsThinking(false);
+
+    // After 3 seconds return to idle
+    setTimeout(() => {
+        setAnimation("Idle");
+    }, 3000);
+
+
+
   } catch (err) {
     // Remove thinking bubble
     const finalMessages = [

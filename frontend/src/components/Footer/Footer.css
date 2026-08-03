@@ -79,3 +79,31 @@
     color:white;
 
 }
+.emotion-list {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+
+.emotion-list button {
+
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  background: #222;
+  color: white;
+
+  font-size: 14px;
+
+}
+
+
+.emotion-list button:hover {
+
+  transform: scale(1.05);
+
+}

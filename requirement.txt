@@ -1,81 +1,38 @@
-# -------------------------
 # Backend Framework
-# -------------------------
 fastapi
 uvicorn[standard]
 
-
-# -------------------------
 # Environment Variables
-# -------------------------
 python-dotenv
 
-
-# -------------------------
-# API Requests
-# -------------------------
+# HTTP Requests
 requests
-
-
-# -------------------------
-# LLM Integration
-# -------------------------
-openai
 httpx
 
+# LLM
+openai
 
-# -------------------------
-# Vector Database / Memory
-# -------------------------
+# Memory
 chromadb
 
-
-# -------------------------
 # Embeddings
-# -------------------------
 sentence-transformers
 torch
 
-
-# -------------------------
-# Speech Detection (Speech-to-Text)
-# -------------------------
+# Speech-to-Text
 faster-whisper
 sounddevice
 numpy
+av
 
-
-# -------------------------
-# Text To Speech
-# -------------------------
+# Text-to-Speech
 piper-tts
 
-
-# -------------------------
-# File Handling
-# -------------------------
+# File Uploads
 python-multipart
 
-
-# -------------------------
-# Data Processing
-# -------------------------
+# Validation
 pydantic
 
-
-# -------------------------
 # CORS
-# -------------------------
 starlette
-
-
-# mark down 
-
-react-markdown
-remark-gfm
-react-syntax-highlighter 
-
-# STT
-faster-whisper 
-python-multipart
-av

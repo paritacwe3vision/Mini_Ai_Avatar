@@ -289,119 +289,211 @@ const sendMessage = async (customMessage = null) => {
       startNewChat();
     }
   };
-  //------------------------------------------------
-  // UI
-  //------------------------------------------------
-  return (
-    <section className="chat-panel">
-      <div className="chat-card">
-        <div className="chat-header">
-          <div className="chat-title">
-            💬 AI Assistant
+ //------------------------------------------------
+// UI
+//------------------------------------------------
+return (
+  <section className="chat-panel">
+
+    <div className="chat-card">
+
+      {/* ================= Header ================= */}
+
+      <div className="chat-header">
+
+        <div className="chat-title">
+          <span className="chat-icon">💬</span>
+
+          <div>
+            <h2>Nova AI</h2>
+            <p>Your intelligent assistant</p>
           </div>
+        </div>
+
+        <div className="chat-actions">
+
+          <button
+            className="new-chat-btn"
+            onClick={startNewChat}
+          >
+            ＋ New Chat
+          </button>
+
           <button
             className="history-btn"
             onClick={() => setShowHistory(true)}
           >
-            History
+            🕘 History
           </button>
+
         </div>
-        <div className="chat-messages">
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`message ${msg.sender} ${msg.loading ? "loading" : ""}`}
-                  >
-                    {msg.loading ? (
-                      <div className="thinking-animation">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span className="thinking-text">
-                          Thinking...
-                        </span>
-                      </div>
-                    ) : (
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          code({
-                            inline,
-                            className,
-                            children,
-                            ...props
-                          }) {
-                            const match = /language-(\w+)/.exec(className || "");
-                            return !inline && match ? (
-                              <SyntaxHighlighter
-                                style={oneDark}
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).replace(/\n$/, "")}
-                              </SyntaxHighlighter>
-                            ) : (
-                              <code className={className} {...props}>
-                                {children}
-                              </code>
-                            );
-                          },
-                        }}
-                      >
-                        {msg.text}
-                      </ReactMarkdown>
-                    )}
-                  </div>
-                ))}
-                <div ref={bottomRef}></div>
-              </div>
-        <div className="chat-input">
-          <button
-            disabled={isThinking}
-            className={`mic-button ${isRecording ? "recording" : ""}`}
-            onClick={startListening}
-          >
-                {
-        isRecording
-            ? "⏹ Stop"
-            : "🎤 Speak"
-    }
-          </button>
-          <input
-            disabled={isThinking}
-            type="text"
-            placeholder={
-                isThinking
-                    ? "Thinking..."
-                    : "Type your message..."
-            }
-            value={input}
-            onChange={(e) =>
-              setInput(e.target.value)
-            }
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                sendMessage();
-              }
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={isThinking}
-          >
-            Send
-          </button>
-        </div>
+
       </div>
-      <HistoryPanel
-        showHistory={showHistory}
-        history={history}
-        loadConversation={loadConversation}
-        startNewChat={startNewChat}
-        deleteConversation={deleteConversation}
-        closeHistory={() => setShowHistory(false)}
-      />
-    </section>
-  );
+
+      {/* ================= Messages ================= */}
+
+      <div className="chat-messages">
+
+        {messages.map((msg, index) => (
+
+          <div
+            key={index}
+            className={`message-row ${msg.sender}`}
+          >
+            <div
+              className={`message ${msg.sender} ${
+                msg.loading ? "loading" : ""
+              }`}
+            >
+
+              {msg.loading ? (
+
+                <div className="thinking-animation">
+
+                  <span></span>
+                  <span></span>
+                  <span></span>
+
+                  <span className="thinking-text">
+                    Nova is thinking...
+                  </span>
+
+                </div>
+
+              ) : (
+
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    code({
+                      inline,
+                      className,
+                      children,
+                      ...props
+                    }) {
+                      const match = /language-(\w+)/.exec(
+                        className || ""
+                      );
+
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={oneDark}
+                          language={match[1]}
+                          PreTag="div"
+                          {...props}
+                        >
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code
+                          className={className}
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {msg.text}
+                </ReactMarkdown>
+
+              )}
+
+            </div>
+
+          </div>
+
+        ))}
+
+        <div ref={bottomRef}></div>
+
+      </div>
+  
+      {/* ================= Input ================= */}
+
+      <div className="chat-input">
+
+  <div className="chat-input-container">
+
+    {/* Hidden File Input */}
+    <input
+      id="file-upload"
+      type="file"
+      hidden
+      accept=".pdf,.doc,.docx"
+      onChange={(e) => {
+        console.log(e.target.files);
+      }}
+    />
+
+    {/* Upload */}
+    <button
+      type="button"
+      className="upload-button"
+      onClick={() =>
+        document.getElementById("file-upload").click()
+      }
+      title="Upload PDF or DOCX"
+    >
+      📎
+    </button>
+
+    {/* Text */}
+    <input
+      disabled={isThinking}
+      type="text"
+      placeholder={
+        isThinking
+          ? "Nova is thinking..."
+          : "Ask Nova anything..."
+      }
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") sendMessage();
+      }}
+    />
+
+    {/* Mic */}
+    <button
+      className={`voice-btn ${isRecording ? "recording" : ""}`}
+      onClick={startListening}
+      disabled={isThinking}
+      title="Speak"
+    >
+      {isRecording ? "⏹" : "🎤"}
+    </button>
+
+    {/* Send */}
+    <button
+      className="send-btn"
+      onClick={sendMessage}
+      disabled={isThinking}
+      title="Send"
+    >
+      ➜
+    </button>
+
+  </div>
+
+  <div className="upload-hint">
+      Supports <b>PDF</b> and <b>DOCX</b> files
+  </div>
+
+</div>
+</div>
+    {/* ================= History ================= */}
+
+    <HistoryPanel
+      showHistory={showHistory}
+      history={history}
+      loadConversation={loadConversation}
+      startNewChat={startNewChat}
+      deleteConversation={deleteConversation}
+      closeHistory={() => setShowHistory(false)}
+    />
+
+  </section>
+);
 }

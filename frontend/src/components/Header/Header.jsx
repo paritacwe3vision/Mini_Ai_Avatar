@@ -3,15 +3,23 @@ import "./Header.css";
 export default function Header() {
   return (
     <header className="header">
-      <div className="logo">
-        🤖 AI Avatar
+
+      <div className="header-left">
+        <div className="logo-icon">
+          🤖
+        </div>
+
+        <div className="logo-text">
+          <h1>Nova AI</h1>
+          <p>Your Intelligent Assistant</p>
+        </div>
       </div>
 
-      <div className="header-status">
-        <div className="status-card">🎤 Mic OFF</div>
-        <div className="status-card">😴 Idle</div>
-        <div className="status-card">😊 Neutral</div>
+      <div className="header-right">
+        <span className="online-dot"></span>
+        <span>Online</span>
       </div>
+
     </header>
   );
 }

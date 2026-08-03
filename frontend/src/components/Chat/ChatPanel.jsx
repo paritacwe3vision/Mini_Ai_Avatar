@@ -124,52 +124,114 @@ const sendMessage = async (customMessage = null) => {
         message: userText,
       }
     );
+    
+    const emotionMap = {
+      happy: "Happy",
+      sad: "Sad",
+      angry: "Angry",
+      thinking: "Thinking",
+      neutral: "Idle",
+    };
+    
+    const avatarEmotion =
+      emotionMap[res.data.emotion] || "Idle";
+    
+    console.log("Backend Emotion:", res.data.emotion);
+    console.log("Avatar Animation:", avatarEmotion);
+    
     // Remove thinking bubble
     const finalMessages = [
       ...updatedMessages.slice(0, -1),
       {
         sender: "ai",
         text: res.data.reply,
+        emotion: res.data.emotion,
       },
     ];
+    
     setMessages(finalMessages);
+    
     saveConversation(finalMessages);
-
-    // Emotion returned from backend
-    const emotion = res.data.emotion;
-
+    
     // Play emotion animation
-    switch (emotion) {
-
-      case "happy":
-        setAnimation("Happy");
-        break;
-
-      case "sad":
-        setAnimation("Sad");
-        break;
-
-      case "angry":
-        setAnimation("Angry");
-        break;
-
-      case "thinking":
-        setAnimation("Thinking");
-        break;
-
-      default:
-        setAnimation("Idle");
-    }
-
-    // Stop thinking state
+    setAnimation(avatarEmotion);
+    console.log("Sending animation:", avatarEmotion);
+    
     setIsThinking(false);
 
-    // After 3 seconds return to idle
+
+// Emotion duration
+const emotionDuration = {
+  Happy: 10000,
+  Sad: 10000,
+  Angry: 30000,
+  Thinking: 5000,
+  Idle: 0,
+};
+
+
+// If emotion exists
+if (avatarEmotion !== "Idle") {
+
+  setAnimation(avatarEmotion);
+
+  setTimeout(() => {
+
+    // After emotion reaction
+    setAnimation("Speaking");
+
+      }, emotionDuration[avatarEmotion]);
+
+
+    } 
+    else {
+
+      // No emotion detected
+      setAnimation("Speaking");
+
+    }
+
+
+    // Return to idle after 10 seconds
     setTimeout(() => {
-        setAnimation("Idle");
-    }, 3000);
 
+      setAnimation("Idle");
 
+    }, 10000);
+
+    // // Emotion returned from backend
+    // const emotion = res.data.emotion;
+
+    // // Play emotion animation
+    // switch (emotion) {
+
+    //   case "happy":
+    //     setAnimation("Happy");
+    //     break;
+
+    //   case "sad":
+    //     setAnimation("Sad");
+    //     break;
+
+    //   case "angry":
+    //     setAnimation("Angry");
+    //     break;
+
+    //   case "thinking":
+    //     setAnimation("Thinking");
+    //     break;
+
+    //   default:
+    //     setAnimation("Idle");
+    // }
+
+    // // Stop thinking state
+    // setIsThinking(false);
+
+    // // After 3 seconds return to idle
+    // setTimeout(() => {
+    //     setAnimation("Idle");
+    // }, 3000);
 
   } catch (err) {
     // Remove thinking bubble

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import time
 
 from services.memory_service import save_memory, search_memory
 from services.llm_service import generate_response
@@ -107,5 +108,5 @@ def chat(request: ChatRequest):
         "reply": reply,
         "emotion": emotion,
         "memory": memories,
-        "audio": f"/static/audio/{audio_file}"
+        "audio": f"/static/{audio_file}?v={int(time.time() * 1000)}"
     }

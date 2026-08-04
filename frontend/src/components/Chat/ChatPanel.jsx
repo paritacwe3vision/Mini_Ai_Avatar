@@ -420,47 +420,58 @@ return (
 
         <div className="chat-actions">
 
-          <button
-            className="new-chat-btn"
-            onClick={startNewChat}
-          >
-            ＋ New Chat
-          </button>
+  {/* New Chat */}
+  <button
+    className="new-chat-btn"
+    onClick={startNewChat}
+  >
+    ＋ New Chat
+  </button>
 
-          <button
+  {/* History */}
+  <button
+    className="history-btn"
+    onClick={() => setShowHistory(true)}
+  >
+    🕘 History
+  </button>
+
+  {/* Speaker */}
+  <button
     className="history-btn"
     onClick={() => {
 
-        const muted = !isMuted;
+      const muted = !isMuted;
 
-        setIsMuted(muted);
+      setIsMuted(muted);
 
-        console.log("Muted:", muted);
+      console.log("Muted:", muted);
 
-        if (audioRef.current) {
+      if (audioRef.current) {
 
-            if (muted) {
+        if (muted) {
 
-                // Pause immediately
-                audioRef.current.pause();
+          // Stop speaking immediately
+          audioRef.current.pause();
 
-            } else {
+        } else {
 
-                // Resume speaking
-                audioRef.current.play().catch(err => {
-                    console.error(err);
-                });
-
-            }
+          // Resume speaking
+          audioRef.current.play().catch((err) => {
+            console.error(err);
+          });
 
         }
 
-    }}
->
-    {isMuted ? "🔇" : "🔊"}
-</button>
+      }
 
-        </div>
+    }}
+    title={isMuted ? "Unmute" : "Mute"}
+  >
+    {isMuted ? "🔇" : "🔊"}
+  </button>
+
+</div>
 
       </div>
 

@@ -11,6 +11,7 @@ httpx
 
 # LLM
 openai
+tavily-python
 
 # Memory
 chromadb

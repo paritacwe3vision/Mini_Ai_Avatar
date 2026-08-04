@@ -347,7 +347,7 @@ def get_response_style(user_message: str):
 
 #     return response.choices[0].message.content.strip()
 
-def generate_response(user_message, memories):
+def generate_response(user_message, memories, web_results=None):
     
     # ==========================================================
     # 1. Detect Emotion
@@ -390,6 +390,7 @@ Assistant:
         memory=memory_list,
         emotion=emotion,
         emotion_rules=emotion_rules,
+        web_results=web_results,
     )
 
     # ==========================================================

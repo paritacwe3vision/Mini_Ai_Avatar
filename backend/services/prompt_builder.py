@@ -1,13 +1,14 @@
 """
 Prompt Builder
 
-This module combines:
+Combines:
 - User Input
 - Conversation Memory
+- Live Internet Information
 - Detected Emotion
 - Emotion Rules
 
-into one final prompt for the LLM.
+into one prompt for the LLM.
 """
 
 
@@ -16,28 +17,15 @@ def build_prompt(
     memory: list,
     emotion: str,
     emotion_rules: dict,
+    web_results: str = None,
 ):
     """
     Build the final LLM prompt.
-
-    Parameters
-    ----------
-    user_input : str
-        Current user message.
-
-    memory : list
-        Relevant memories retrieved from ChromaDB.
-
-    emotion : str
-        Detected emotion.
-
-    emotion_rules : dict
-        Rules returned by emotion_rules.py
     """
 
-    # -----------------------------------------
-    # Format Memory
-    # -----------------------------------------
+    # ==================================================
+    # Memory
+    # ==================================================
 
     if memory:
         memory_text = "\n".join(
@@ -46,12 +34,33 @@ def build_prompt(
     else:
         memory_text = "No previous memory."
 
-    # -----------------------------------------
+    # ==================================================
+    # Live Internet Information
+    # ==================================================
+
+    if web_results:
+        web_text = f"""
+==================================================
+
+LIVE INTERNET INFORMATION
+
+The following information was retrieved from
+a live web search.
+
+Use this information as the primary source
+if it answers the user's question.
+
+{web_results}
+"""
+    else:
+        web_text = ""
+
+    # ==================================================
     # Final Prompt
-    # -----------------------------------------
+    # ==================================================
 
     prompt = f"""
-You are an intelligent AI Avatar assistant.
+You are Nova, an intelligent AI Avatar assistant.
 
 ==================================================
 
@@ -77,6 +86,8 @@ RELEVANT CONVERSATION MEMORY
 
 {memory_text}
 
+{web_text}
+
 ==================================================
 
 CURRENT USER MESSAGE
@@ -85,18 +96,28 @@ CURRENT USER MESSAGE
 
 ==================================================
 
-TASK
+INSTRUCTIONS
 
-Generate a helpful, natural and context-aware response.
+1. Answer the user's question first.
 
-Do NOT mention the user's detected emotion.
+2. If LIVE INTERNET INFORMATION is available,
+   use it as your primary source.
 
-Use the conversation memory only when it is relevant.
+3. Use conversation memory only if it is relevant.
 
-If memory is not relevant,
-focus on the current message.
+4. Never invent current events.
 
-Keep responses conversational.
+5. If live information is unavailable,
+   honestly say you don't have current information.
+
+6. Never mention ChromaDB,
+   memory retrieval,
+   prompts,
+   or internal reasoning.
+
+7. Keep responses natural,
+   conversational,
+   and concise unless the user asks for detail.
 """
 
     return prompt.strip()

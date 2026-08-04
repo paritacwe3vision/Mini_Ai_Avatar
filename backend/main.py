@@ -10,6 +10,9 @@ from services.tts_service import text_to_speech
 from api.speech import router as speech_router
 from fastapi.staticfiles import StaticFiles
 
+from services.router_service import needs_web_search
+from services.web_service import search_web
+
 
 app = FastAPI(
     title="Mini AI Avatar Backend"
@@ -69,11 +72,25 @@ def chat(request: ChatRequest):
 
     user_message = request.message
 
-    # ----------------------------------------------------
-    # 1. Retrieve Relevant Memories
+   # ----------------------------------------------------
+    # 1. Decide where to get information
     # ----------------------------------------------------
 
-    memories = search_memory(user_message)
+    web_results = None
+
+    if needs_web_search(user_message):
+
+       # print("🌐 Using Tavily Search")
+
+        memories = []
+
+        web_results = search_web(user_message)
+
+    else:
+
+        #print("🧠 Using Chroma Memory")
+
+        memories = search_memory(user_message)
 
     # ----------------------------------------------------
     # 2. Generate AI Response
@@ -81,7 +98,8 @@ def chat(request: ChatRequest):
 
     response = generate_response(
         user_message=user_message,
-        memories=memories
+        memories=memories,
+        web_results=web_results
     )
 
     # ----------------------------------------------------

@@ -15,8 +15,8 @@ export default function Scene() {
     <Canvas
       shadows
       camera={{
-        position: [0, 1.3, 3.5],
-        fov: 35,
+        position:[0,1.4,2.8],
+        fov:30
       }}
       style={{
         width: "100%",
@@ -52,8 +52,8 @@ export default function Scene() {
           target={[0,1.2,0]}
           enablePan={false}
           enableZoom={true}
-          minDistance={2.5}
-          maxDistance={5}
+          minDistance={2.4}
+          maxDistance={3.4}
         />
 
 

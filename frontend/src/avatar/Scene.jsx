@@ -49,7 +49,7 @@ export default function Scene() {
 
 
         <OrbitControls
-          target={[0,1.2,0]}
+          target={[0,1.3,0]}
           enablePan={false}
           enableZoom={true}
           minDistance={2.4}

@@ -126,7 +126,7 @@ export default function Mixamo({ emotion = "Idle" }) {
   return (
     <group
       ref={group}
-      position={[0, 0.6, 0]}
+      position={[0, 0.7, 0]}
       rotation={[-Math.PI / 2, 0, 0]}
       scale={[0.7, 0.7, 0.7]}
     >

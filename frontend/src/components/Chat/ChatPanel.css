@@ -3,8 +3,8 @@
 ===================================================== */
 
 .chat-panel {
-    width: 40%;
-    height: 100%;
+    width: 70%;
+    height: 110%;
     padding: 20px;
     display: flex;
     box-sizing: border-box;

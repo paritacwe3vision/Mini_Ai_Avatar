@@ -4,7 +4,7 @@ import Scene from "../../avatar/Scene";
 export default function AvatarPanel({ emotion }) {
   return (
     <section className="avatar-panel">
-      <div className="avatar-card">
+      {/* <div className="avatar-card">
 
         <div className="avatar-header">
           <div className="avatar-title">
@@ -21,6 +21,9 @@ export default function AvatarPanel({ emotion }) {
           <Scene emotion={emotion} />
         </div>
 
+      </div> */}
+      <div className="avatar-body">
+          <Scene emotion={emotion} />
       </div>
     </section>
   );

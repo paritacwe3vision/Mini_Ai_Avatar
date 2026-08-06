@@ -41,6 +41,8 @@ export default function ChatPanel() {
   const audioChunksRef = useRef([]);
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFile,setUploadedFile]=useState(null);
   //------------------------------------------------
   // Load History
   //------------------------------------------------
@@ -102,7 +104,14 @@ const sendMessage = async (customMessage = null) => {
   const userMessage = {
     sender: "user",
     text: userText,
-  };
+    file: uploadedFile
+        ? {
+            name: uploadedFile.name,
+            size: uploadedFile.size,
+            type: uploadedFile.type
+        }
+        : null,
+};
   // Temporary AI thinking bubble
   const thinkingMessage = {
     sender: "ai",
@@ -116,6 +125,7 @@ const sendMessage = async (customMessage = null) => {
   ];
   setMessages(updatedMessages);
   setInput("");
+  setUploadedFile(null);
   setIsThinking(true);
   // Avatar Thinking Animation
   setAnimation("Thinking");
@@ -204,80 +214,6 @@ console.log("Avatar Animation:", avatarEmotion);
     console.log("Sending animation:", avatarEmotion);
     
     setIsThinking(false);
-
-/* 
-// Emotion duration
-const emotionDuration = {
-  Happy: 10000,
-  Sad: 10000,
-  Angry: 30000,
-  Thinking: 5000,
-  Idle: 0,
-};
-
-
-// If emotion exists
-if (avatarEmotion !== "Idle") {
-
-  setAnimation(avatarEmotion);
-
-  setTimeout(() => {
-
-    // After emotion reaction
-    setAnimation("Speaking");
-
-      }, emotionDuration[avatarEmotion]);
-
-
-    } 
-    else {
-
-      // No emotion detected
-      setAnimation("Speaking");
-
-    }
-
-
-    // Return to idle after 10 seconds
-    setTimeout(() => {
-
-      setAnimation("Idle");
-
-    }, 10000);
- */
-    // // Emotion returned from backend
-    // const emotion = res.data.emotion;
-
-    // // Play emotion animation
-    // switch (emotion) {
-
-    //   case "happy":
-    //     setAnimation("Happy");
-    //     break;
-
-    //   case "sad":
-    //     setAnimation("Sad");
-    //     break;
-
-    //   case "angry":
-    //     setAnimation("Angry");
-    //     break;
-
-    //   case "thinking":
-    //     setAnimation("Thinking");
-    //     break;
-
-    //   default:
-    //     setAnimation("Idle");
-    // }
-
-    // // Stop thinking state
-    // setIsThinking(false);
-
-    // // After 3 seconds return to idle
-    // setTimeout(() => {
-    //     setAnimation("Idle");
-    // }, 3000);
 
   } catch (err) {
     // Remove thinking bubble
@@ -368,12 +304,14 @@ if (avatarEmotion !== "Idle") {
   //------------------------------------------------
   // New Chat
   //------------------------------------------------
-  const startNewChat = () => {
+ const startNewChat = () => {
     setMessages(defaultMessages);
     setCurrentChatId(null);
     setShowHistory(false);
+    setUploadedFile(null);
+    setInput("");
     setAnimation("Idle");
-  };
+};
   //------------------------------------------------
   // Load Conversation
   //------------------------------------------------
@@ -397,18 +335,82 @@ if (avatarEmotion !== "Idle") {
       startNewChat();
     }
   };
+
+
+    // ======================================================
+    // Upload Document
+    // ======================================================
+
+    const uploadDocument = async (event) => {
+
+      const file = event.target.files[0];
+
+      if (!file) return;
+
+      setUploadedFile(file);
+      setIsUploading(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+
+        const response = await axios.post(
+          `${API_URL}/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // Show uploaded file as a user attachment
+        
+          setUploadedFile(file);
+        // Don't send any prompt automatically.
+        // Let the user type their own question.
+
+        // Optional: focus the text box
+        document.querySelector(".chat-input-container input")?.focus();
+
+      } catch (err) {
+
+        console.error(err);
+
+        let errorMessage = "Failed to upload document.";
+
+        if (err.response?.data?.detail) {
+          errorMessage = err.response.data.detail;
+        }
+
+        setMessages(prev => [
+          ...prev,
+          {
+            sender: "ai",
+            text: `❌ ${errorMessage}`
+          }
+        ]);
+        setUploadedFile(null);
+      } finally {
+
+        setIsUploading(false);
+
+        event.target.value = "";
+
+      }
+
+    };
  //------------------------------------------------
 // UI
 //------------------------------------------------
 return (
   <section className="chat-panel">
-
     <div className="chat-card">
 
       {/* ================= Header ================= */}
 
       <div className="chat-header">
-
         <div className="chat-title">
           <span className="chat-icon">💬</span>
 
@@ -420,225 +422,317 @@ return (
 
         <div className="chat-actions">
 
-  {/* New Chat */}
-  <button
-    className="new-chat-btn"
-    onClick={startNewChat}
-  >
-    ＋ New Chat
-  </button>
+          <button
+            className="new-chat-btn"
+            onClick={startNewChat}
+          >
+            ＋ New Chat
+          </button>
 
-  {/* History */}
-  <button
-    className="history-btn"
-    onClick={() => setShowHistory(true)}
-  >
-    🕘 History
-  </button>
+          <button
+            className="history-btn"
+            onClick={() => setShowHistory(true)}
+          >
+            🕘 History
+          </button>
 
-  {/* Speaker */}
-  <button
-    className="history-btn"
-    onClick={() => {
+          <button
+            className="history-btn"
+            title={isMuted ? "Unmute" : "Mute"}
+            onClick={() => {
 
-      const muted = !isMuted;
+              const muted = !isMuted;
 
-      setIsMuted(muted);
+              setIsMuted(muted);
 
-      console.log("Muted:", muted);
+              if (audioRef.current) {
 
-      if (audioRef.current) {
+                if (muted) {
 
-        if (muted) {
+                  audioRef.current.pause();
 
-          // Stop speaking immediately
-          audioRef.current.pause();
+                } else {
 
-        } else {
+                  audioRef.current.play().catch((err) => {
+                    console.error(err);
+                  });
 
-          // Resume speaking
-          audioRef.current.play().catch((err) => {
-            console.error(err);
-          });
+                }
 
-        }
+              }
 
-      }
+            }}
+          >
+            {isMuted ? "🔇" : "🔊"}
+          </button>
 
-    }}
-    title={isMuted ? "Unmute" : "Mute"}
-  >
-    {isMuted ? "🔇" : "🔊"}
-  </button>
+        </div>
+      </div>
+     
+{/* ================= Messages ================= */}
 
-</div>
+<div className="chat-messages">
+
+  {messages.map((msg, index) => (
+    <div
+      key={index}
+      className={`message-row ${msg.sender}`}
+    >
+
+      {msg.sender === "user" && (
+        <div className="avatar-icon user-avatar"></div>
+      )}
+
+      <div className="message-wrapper">
+
+        <div
+          className={`message ${msg.sender} ${
+            msg.loading ? "loading" : ""
+          }`}
+        >
+
+          {msg.file && (
+            <div className="message-file-card">
+
+              <div className="message-pdf-icon">
+                📄
+              </div>
+
+              <div className="message-file-info">
+
+                <div className="message-file-name">
+                  {msg.file.name}
+                </div>
+
+                <div className="message-file-size">
+                  {msg.file.type === "application/pdf"
+                    ? "PDF"
+                    : "FILE"
+                  }
+                  {" • "}
+                  {(msg.file.size / 1024 / 1024).toFixed(2)} MB
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {msg.loading ? (
+
+            <div className="thinking-animation">
+
+              <div className="thinking-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <span className="thinking-text">
+                Nova is thinking...
+              </span>
+
+            </div>
+
+          ) : (
+
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({
+                  inline,
+                  className,
+                  children,
+                  ...props
+                }) {
+
+                  const match = /language-(\w+)/.exec(
+                    className || ""
+                  );
+
+                  if (!inline && match) {
+
+                    return (
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={match[1]}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, "")}
+                      </SyntaxHighlighter>
+                    );
+
+                  }
+
+                  return (
+                    <code
+                      className={className}
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  );
+
+                }
+              }}
+            >
+              {msg.text || ""}
+            </ReactMarkdown>
+
+          )}
+
+        </div>
 
       </div>
 
-      {/* ================= Messages ================= */}
+      {msg.sender === "ai" && (
+        <div className="avatar-icon ai-avatar"></div>
+      )}
 
-      <div className="chat-messages">
+    </div>
+  ))}
 
-        {messages.map((msg, index) => (
+  <div ref={bottomRef}></div>
 
-          <div
-            key={index}
-            className={`message-row ${msg.sender}`}
-          >
-            <div
-              className={`message ${msg.sender} ${
-                msg.loading ? "loading" : ""
-              }`}
-            >
+</div>
+    {/* ================= Input ================= */}
 
-              {msg.loading ? (
+    <div className="chat-input">
 
-                <div className="thinking-animation">
+      {/* Selected File Preview */}
 
-                  <span></span>
-                  <span></span>
-                  <span></span>
+      {uploadedFile && (
+        <div className="uploaded-file-card">
 
-                  <span className="thinking-text">
-                    Nova is thinking...
-                  </span>
+          <div className="uploaded-file-left">
 
-                </div>
+            <div className="pdf-icon">📄</div>
 
-              ) : (
+            <div>
+              <div className="uploaded-file-name">
+                {uploadedFile.name}
+              </div>
 
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    code({
-                      inline,
-                      className,
-                      children,
-                      ...props
-                    }) {
-                      const match = /language-(\w+)/.exec(
-                        className || ""
-                      );
-
-                      return !inline && match ? (
-                        <SyntaxHighlighter
-                          style={oneDark}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                        >
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code
-                          className={className}
-                          {...props}
-                        >
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                >
-                  {msg.text}
-                </ReactMarkdown>
-
-              )}
-
+              <div className="uploaded-file-type">
+                PDF • {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+              </div>
             </div>
 
           </div>
 
-        ))}
+          <button
+            className="remove-file-btn"
+            onClick={() => setUploadedFile(null)}
+          >
+            ✕
+          </button>
 
-        <div ref={bottomRef}></div>
+        </div>
+      )}
+
+      <div className="chat-input-container">
+
+        {/* Hidden Upload */}
+
+        <input
+          id="file-upload"
+          type="file"
+          hidden
+          accept=".pdf,.doc,.docx"
+          onChange={uploadDocument}
+        />
+
+        {/* Upload */}
+
+        <button
+          type="button"
+          className="upload-button"
+          disabled={isUploading}
+          onClick={() =>
+            document.getElementById("file-upload").click()
+          }
+          title="Upload PDF / DOCX"
+        >
+          {isUploading ? "Uploading..." : "📎"}
+        </button>
+
+        {/* Message */}
+
+        <input
+          type="text"
+          disabled={isThinking || isUploading}
+          placeholder={
+            isThinking
+              ? "Nova is thinking..."
+              : uploadedFile
+              ? `Ask anything about "${uploadedFile.name}"`
+              : "Message Nova..."
+          }
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
+        />
+
+        {/* Voice */}
+
+        <button
+          className={`voice-btn ${
+            isRecording ? "recording" : ""
+          }`}
+          onClick={startListening}
+          disabled={isThinking || isUploading}
+          title="Voice"
+        >
+          {isRecording ? "⏹" : "🎤"}
+        </button>
+
+        {/* Send */}
+
+        <button
+          className="send-btn"
+          onClick={sendMessage}
+          disabled={isThinking || isUploading}
+          title="Send"
+        >
+          ➜
+        </button>
 
       </div>
-  
-      {/* ================= Input ================= */}
 
-      <div className="chat-input">
+      <div className="chat-footer">
 
-  <div className="chat-input-container">
+        <span>
+          {uploadedFile
+            ? `📄 Selected: ${uploadedFile.name}`
+            : "📄 PDF & DOCX Supported"}
+        </span>
 
-    {/* Hidden File Input */}
-    <input
-      id="file-upload"
-      type="file"
-      hidden
-      accept=".pdf,.doc,.docx"
-      onChange={(e) => {
-        console.log(e.target.files);
-      }}
-    />
+        <span>
+          Press <b>Enter</b> to send
+        </span>
 
-    {/* Upload */}
-    <button
-      type="button"
-      className="upload-button"
-      onClick={() =>
-        document.getElementById("file-upload").click()
-      }
-      title="Upload PDF or DOCX"
-    >
-      📎
-    </button>
+      </div>
 
-    {/* Text */}
-    <input
-      disabled={isThinking}
-      type="text"
-      placeholder={
-        isThinking
-          ? "Nova is thinking..."
-          : "Ask Nova anything..."
-      }
-      value={input}
-      onChange={(e) => setInput(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") sendMessage();
-      }}
-    />
+    </div> {/* chat-input */}
 
-    {/* Mic */}
-    <button
-      className={`voice-btn ${isRecording ? "recording" : ""}`}
-      onClick={startListening}
-      disabled={isThinking}
-      title="Speak"
-    >
-      {isRecording ? "⏹" : "🎤"}
-    </button>
+  </div> {/* chat-card */}
 
-    {/* Send */}
-    <button
-      className="send-btn"
-      onClick={sendMessage}
-      disabled={isThinking}
-      title="Send"
-    >
-      ➜
-    </button>
+  {/* ================= History ================= */}
 
-  </div>
+  <HistoryPanel
+    showHistory={showHistory}
+    history={history}
+    loadConversation={loadConversation}
+    startNewChat={startNewChat}
+    deleteConversation={deleteConversation}
+    closeHistory={() => setShowHistory(false)}
+  />
 
-  <div className="upload-hint">
-      Supports <b>PDF</b> and <b>DOCX</b> files
-  </div>
-
-</div>
-</div>
-    {/* ================= History ================= */}
-
-    <HistoryPanel
-      showHistory={showHistory}
-      history={history}
-      loadConversation={loadConversation}
-      startNewChat={startNewChat}
-      deleteConversation={deleteConversation}
-      closeHistory={() => setShowHistory(false)}
-    />
-
-  </section>
+</section>
 );
 }

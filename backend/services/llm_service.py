@@ -270,84 +270,7 @@ def get_response_style(user_message: str):
     )
 
 
-# ============================================================
-# Generate Response
-# ============================================================
-
-# def generate_response(user_message, memories):
-
-#     context = ""
-
-#     for memory in memories:
-
-#         context += f"""
-
-# Previous Conversation
-
-# User:
-# {memory["user_message"]}
-
-# Assistant:
-# {memory["assistant_response"]}
-
-# """
-
-#     response_style = get_response_style(user_message)
-#     user_prompt = f"""
-#     Relevant Previous Memory:
-
-#     {context if context else "None"}
-
-#     Current User Message:
-
-#     {user_message}
-
-#     Instructions:
-
-#     {response_style}
-
-#     Follow these rules strictly.
-
-#     - Answer naturally.
-#     - Answer the user's question first.
-#     - Never explain internal reasoning.
-#     - Never explain memory unless asked.
-#     - Don't repeat yourself.
-#     - Don't write more than necessary.
-#     - If a short answer is enough, stop after answering.
-#         """
-
-#     response = client.chat.completions.create(
-
-#        
-          #model="deepseek/deepseek-r1:free",
-        
-
-#         temperature=0.5,
-
-#         max_tokens = 800 if "detailed" in response_style.lower() else 200,
-
-#          extra_body={
-#         "provider": {
-#             "sort": "throughput"
-#         }
-#     },
-    
-#         messages=[
-#             {
-#                 "role": "system",
-#                 "content": SYSTEM_PROMPT,
-#             },
-#             {
-#                 "role": "user",
-#                 "content": user_prompt,
-#             },
-#         ],
-#     )
-
-#     return response.choices[0].message.content.strip()
-
-def generate_response(user_message, memories, web_results=None):
+def generate_response(user_message, memories,  document_results=None, web_results=None):
     
     # ==========================================================
     # 1. Detect Emotion
@@ -373,21 +296,28 @@ def generate_response(user_message, memories, web_results=None):
 
         memory_list.append(
             f"""
-User:
-{memory["user_message"]}
+    User:
+    {memory.get("user_message", "")}
 
-Assistant:
-{memory["assistant_response"]}
-"""
+    Assistant:
+    {memory.get("assistant_response", "")}
+    """
         )
 
     # ==========================================================
     # 4. Build Final Prompt
     # ==========================================================
 
+    document_list = []
+
+    if document_results:
+
+        document_list = document_results
+
     final_prompt = build_prompt(
         user_input=user_message,
         memory=memory_list,
+        documents=document_list,
         emotion=emotion,
         emotion_rules=emotion_rules,
         web_results=web_results,
@@ -405,11 +335,12 @@ Assistant:
 
     response = client.chat.completions.create(
 
-        model="deepseek/deepseek-chat-v3.1",
+       model="poolside/laguna-s-2.1:free",
+       #model="google/gemma-3-4b-it:free",
 
-        temperature=0.5,
+        temperature=0.7,
 
-        max_tokens=800 if "detailed" in response_style.lower() else 200,
+        max_tokens=800,
 
         extra_body={
             "provider": {
@@ -432,8 +363,9 @@ Assistant:
     # ==========================================================
     # 7. Return Reply + Emotion
     # ==========================================================
+    reply = response.choices[0].message.content
 
     return {
-        "reply": response.choices[0].message.content.strip(),
+        "reply": reply.strip(),
         "emotion": emotion,
     }

@@ -37,3 +37,9 @@ pydantic
 
 # CORS
 starlette
+
+#pdf
+pypdf
+python-docx
+langchain-text-splitters
+sentence-transformers

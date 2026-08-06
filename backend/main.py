@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import time
 
+from api.speech import router as speech_router
+from api.upload import router as upload_router
+
 from services.memory_service import save_memory, search_memory
+from services.document_service import search_documents
 from services.llm_service import generate_response
 from services.tts_service import text_to_speech
-
-from api.speech import router as speech_router
-from fastapi.staticfiles import StaticFiles
-
 from services.router_service import needs_web_search
 from services.web_service import search_web
 
@@ -24,38 +25,38 @@ app.mount(
     name="static",
 )
 
-
-# -----------------------------
-# Speech API
-# -----------------------------
+# ----------------------------------------------------  
+# API Routers
+# ----------------------------------------------------
 
 app.include_router(speech_router)
+app.include_router(upload_router)
 
-# -----------------------------
+# ----------------------------------------------------
 # CORS
-# -----------------------------
+# ----------------------------------------------------
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://localhost:5174"
+        "http://localhost:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -----------------------------
+# ----------------------------------------------------
 # Request Model
-# -----------------------------
+# ----------------------------------------------------
 
 class ChatRequest(BaseModel):
     message: str
 
-# -----------------------------
+# ----------------------------------------------------
 # Home
-# -----------------------------
+# ----------------------------------------------------
 
 @app.get("/")
 def home():
@@ -63,68 +64,69 @@ def home():
         "message": "Mini AI Avatar Backend Running"
     }
 
-# -----------------------------
+# ----------------------------------------------------
 # Chat API
-# -----------------------------
+# ----------------------------------------------------
 
 @app.post("/chat")
 def chat(request: ChatRequest):
 
     user_message = request.message
 
-   # ----------------------------------------------------
-    # 1. Decide where to get information
+    # ----------------------------------------------------
+    # Retrieve Context
     # ----------------------------------------------------
 
+    memories = []
+    document_results = []
     web_results = None
 
     if needs_web_search(user_message):
-
-       # print("🌐 Using Tavily Search")
-
-        memories = []
 
         web_results = search_web(user_message)
 
     else:
 
-        #print("🧠 Using Chroma Memory")
-
         memories = search_memory(user_message)
+        document_results = search_documents(user_message)
+        
 
     # ----------------------------------------------------
-    # 2. Generate AI Response
+    # Generate AI Response
     # ----------------------------------------------------
 
     response = generate_response(
         user_message=user_message,
         memories=memories,
-        web_results=web_results
+        document_results=document_results,
+        web_results=web_results,
     )
 
     # ----------------------------------------------------
-    # 3. Extract Reply & Emotion
+    # Generate Speech
     # ----------------------------------------------------
 
     reply = response["reply"]
     emotion = response["emotion"]
+
     audio_file = text_to_speech(reply)
+
     # ----------------------------------------------------
-    # 4. Save Conversation
+    # Save Conversation Memory
     # ----------------------------------------------------
 
     save_memory(
         user_message=user_message,
-        assistant_response=reply
+        assistant_response=reply,
     )
 
     # ----------------------------------------------------
-    # 5. Return Response
+    # Return Response
     # ----------------------------------------------------
 
     return {
         "reply": reply,
         "emotion": emotion,
         "memory": memories,
-        "audio": f"/static/{audio_file}?v={int(time.time() * 1000)}"
+        "audio": f"/static/{audio_file}?v={int(time.time() * 1000)}",
     }

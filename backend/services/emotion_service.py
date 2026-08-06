@@ -79,19 +79,10 @@ def detect_emotion(text: str):
 
     result = emotion_classifier(text)[0][0]
 
-    print("=" * 60)
-    print("INPUT :", text)
-    print("MODEL :", result)
-
     label = result["label"].lower()
     score = round(result["score"], 4)
 
     emotion = EMOTION_MAP.get(label, "neutral")
-
-    print("LABEL :", label)
-    print("MAPPED:", emotion)
-    print("=" * 60)
-
     return {
         "emotion": emotion,
         "score": score

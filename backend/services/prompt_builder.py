@@ -4,6 +4,7 @@ Prompt Builder
 Combines:
 - User Input
 - Conversation Memory
+- Uploaded Documents
 - Live Internet Information
 - Detected Emotion
 - Emotion Rules
@@ -15,6 +16,7 @@ into one prompt for the LLM.
 def build_prompt(
     user_input: str,
     memory: list,
+    documents: list,
     emotion: str,
     emotion_rules: dict,
     web_results: str = None,
@@ -24,7 +26,7 @@ def build_prompt(
     """
 
     # ==================================================
-    # Memory
+    # Conversation Memory
     # ==================================================
 
     if memory:
@@ -33,6 +35,15 @@ def build_prompt(
         )
     else:
         memory_text = "No previous memory."
+
+    # ==================================================
+    # Uploaded Documents
+    # ==================================================
+
+    if documents:
+        document_text = "\n\n".join(documents)
+    else:
+        document_text = "No uploaded documents."
 
     # ==================================================
     # Live Internet Information
@@ -82,6 +93,12 @@ BEHAVIOUR RULES
 
 ==================================================
 
+UPLOADED DOCUMENTS
+
+{document_text}
+
+==================================================
+
 RELEVANT CONVERSATION MEMORY
 
 {memory_text}
@@ -100,22 +117,30 @@ INSTRUCTIONS
 
 1. Answer the user's question first.
 
-2. If LIVE INTERNET INFORMATION is available,
-   use it as your primary source.
+2. If the answer exists in the uploaded documents,
+   use the uploaded documents as the PRIMARY source.
 
-3. Use conversation memory only if it is relevant.
+3. If the uploaded documents do not contain the answer,
+   use relevant conversation memory if applicable.
 
-4. Never invent current events.
+4. If LIVE INTERNET INFORMATION is available,
+   use it for current events, news, weather,
+   stock prices, sports scores, or anything
+   requiring up-to-date information.
 
-5. If live information is unavailable,
-   honestly say you don't have current information.
+5. If none of the above contain the answer,
+   answer using your general knowledge.
 
-6. Never mention ChromaDB,
+6. Never invent facts that are not supported
+   by the uploaded documents or live web information.
+
+7. Never mention ChromaDB,
    memory retrieval,
    prompts,
-   or internal reasoning.
+   internal reasoning,
+   or how you obtained the information.
 
-7. Keep responses natural,
+8. Keep responses natural,
    conversational,
    and concise unless the user asks for detail.
 """

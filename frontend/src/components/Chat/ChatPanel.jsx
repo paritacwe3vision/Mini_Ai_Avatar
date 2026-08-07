@@ -276,7 +276,7 @@ console.log("Avatar Animation:", avatarEmotion);
       {
         sender: "ai",
         text:
-          "⚠️ I couldn't reach the backend ",
+          "Something went wrong!! ",
       },
     ];
     setMessages(finalMessages);
@@ -695,7 +695,7 @@ return (
           {isUploading ? (
             <span className="spinner"></span>
         ) : (
-            "📎"
+            "✛"
         )}
         </button>
 
@@ -730,7 +730,7 @@ return (
           disabled={isThinking || isUploading}
           title="Voice"
         >
-          {isRecording ? "⏹" : "🎤"}
+          {isRecording ? "⏹" : "🎙️"}
         </button>
 
         {/* Send */}
@@ -755,7 +755,7 @@ return (
         <span>
           {uploadedFile
             ? `📄 Selected: ${uploadedFile.name}`
-            : "📄 PDF & DOCX Supported"}
+            : "📄 PDF Supported"}
         </span>
 
         <span>

@@ -485,10 +485,11 @@
     cursor:pointer;
     font-size:18px;
     transition:all .25s ease;
+    color: white;
 }
 
 .upload-button{
-    background:#1f2937;
+    background:#101827;
 }
 
 .upload-button:hover{

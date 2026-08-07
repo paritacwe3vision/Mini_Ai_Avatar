@@ -1,74 +1,156 @@
-# 🤖 AI Avatar - Intelligent Virtual Assistant
+# 🤖 Mini AI Avatar Assistant
 
-An AI-powered virtual avatar capable of **listening, understanding, responding, remembering conversations, and communicating through voice**.
+A multimodal AI assistant that combines Large Language Models, Memory, Voice Interaction, Document Understanding, Web Search, and a 3D Animated Avatar.
 
-This project combines **Artificial Intelligence, Speech Recognition, Large Language Models, Vector Memory, Text-to-Speech, and 3D Avatar Technology** to create an interactive human-like AI assistant.
+The assistant can:
+- Chat with users using AI
+- Remember previous conversations
+- Read and answer questions from PDF/DOCX files
+- Speak responses using offline TTS
+- Accept voice input
+- Search the web for live information
+- Control a 3D avatar with emotions and animations
 
 ---
 
-# ✨ Features
+# 🚀 Features
 
-## 🧠 AI Conversation
-- Natural language conversation using Large Language Models (LLM)
+## 💬 AI Chat
+- LLM powered conversations
+- Custom AI personality
 - Context-aware responses
-- Intelligent response generation
-- Conversation history support
+- Markdown support
+- Code syntax highlighting
 
-## 🎤 Speech Recognition
-- Real-time microphone input
-- Converts human speech into text
-- Powered by Faster Whisper
+## 🧠 AI Memory
+The assistant remembers previous conversations using vector memory.
 
-## 🔊 Text-to-Speech
-- Converts AI responses into natural voice
-- Voice generation using Piper TTS
+Technologies:
+- ChromaDB
+- Sentence Transformers
 
-## 🧩 Long-Term Memory
-- Stores previous conversations
-- Retrieves relevant memories
-- Uses vector embeddings
-- Powered by ChromaDB
-
-## 👤 3D AI Avatar
-- Interactive virtual character
-- Real-time AI responses
-- Avatar rendering using Three.js / Ready Player Me
-
----
-
-# 🏗️ System Architecture
-
+Flow:
 ```
-                     User
-                      |
-                      |
-               🎤 Microphone
-                      |
-                      |
-             Speech Recognition
-              (Faster Whisper)
-                      |
-                      |
-                  FastAPI
-                  Backend
-                      |
-        --------------------------------
-        |                              |
-        |                              |
-       LLM                         ChromaDB
-  (AI Response)                  (Memory Storage)
-        |
-        |
-   Generated Response
-        |
-        |
-      Piper TTS
-        |
-        |
-       🔊 Voice
-        |
-        |
-    3D AI Avatar
+Conversation
+     |
+     ↓
+Embedding Generation
+     |
+     ↓
+ChromaDB Storage
+     |
+     ↓
+Memory Retrieval
+```
+
+## 📄 Document Question Answering (RAG)
+
+Supported files:
+- PDF
+- DOCX
+
+Pipeline:
+```
+Upload File
+     |
+     ↓
+Extract Text
+     |
+     ↓
+Split Into Chunks
+     |
+     ↓
+Generate Embeddings
+     |
+     ↓
+Store In ChromaDB
+     |
+     ↓
+Answer Questions
+```
+
+Used:
+- PyPDF
+- python-docx
+- LangChain Text Splitter
+- ChromaDB
+
+## 🌐 Web Search
+
+The assistant can fetch live information.
+
+Examples:
+- Weather
+- News
+- Sports
+- Current events
+
+Flow:
+```
+User Question
+      |
+      ↓
+Router Service
+      |
+      ↓
+Need Web Search?
+      |
+      ↓
+Search Web
+      |
+      ↓
+Generate Answer
+```
+
+## 🗣️ Voice Assistant
+
+### Text To Speech
+
+Used:
+- Piper TTS
+
+Features:
+- Offline
+- Free
+- Fast
+- No API cost
+
+Flow:
+```
+AI Response
+     |
+     ↓
+Piper TTS
+     |
+     ↓
+speech.wav
+     |
+     ↓
+Audio Playback
+```
+
+## 🧍 3D AI Avatar
+
+Built using:
+- Three.js
+- React Three Fiber
+- Drei
+
+Avatar animations:
+- Idle
+- Thinking
+- Happy
+- Sad
+
+Emotion flow:
+```
+User Input
+     |
+     ↓
+Emotion Detection
+     |
+     ↓
+Avatar Animation
 ```
 
 ---
@@ -77,107 +159,113 @@ This project combines **Artificial Intelligence, Speech Recognition, Large Langu
 
 ## Frontend
 
-- React + Vite
-- JavaScript
-- CSS
-- Three.js
-- Ready Player Me Avatar
+| Technology | Purpose |
+|---|---|
+| React | UI |
+| Vite | Development Server |
+| Three.js | 3D Rendering |
+| React Three Fiber | React 3D Integration |
+| Drei | Three.js Helpers |
+| Axios | API Requests |
+| React Markdown | Markdown Rendering |
+| Prism | Code Highlighting |
 
 ## Backend
 
-- Python
-- FastAPI
-- Uvicorn
-
-## Artificial Intelligence
-
-- Large Language Model (OpenAI / OpenRouter / Ollama)
-- Faster Whisper
-- Piper TTS
-- Sentence Transformers
-
-## Memory System
-
-- ChromaDB
-- Vector Embeddings
-- Semantic Search
+| Technology | Purpose |
+|---|---|
+| FastAPI | Backend API |
+| Uvicorn | Server |
+| Python | Backend Logic |
+| OpenRouter | LLM API |
+| ChromaDB | Vector Database |
+| Sentence Transformers | Embeddings |
+| Piper TTS | Speech Generation |
+| PyPDF | PDF Processing |
+| python-docx | DOCX Processing |
 
 ---
 
 # 📂 Project Structure
 
 ```
-AI-Avatar/
+Mini_AI_Avatar/
 
 │
 ├── backend/
 │
-│   ├── api/
-│   │   ├── chat.py
-│   │   ├── speech.py
-│   │   ├── avatar.py
-│   │   └── health.py
-│   │
-│   ├── services/
-│   │   ├── llm_service.py
-│   │   ├── memory_service.py
-│   │   ├── speech_service.py
-│   │   └── tts_service.py
-│   │
-│   ├── database/
-│   │   └── chroma_db.py
-│   │
-│   ├── main.py
-│   ├── requirements.txt
-│   └── .env
+│── main.py
 │
+├── api/
+│   ├── chat.py
+│   ├── speech.py
+│   └── upload.py
 │
-├── frontend/
+├── services/
+│   ├── llm_service.py
+│   ├── memory_service.py
+│   ├── document_service.py
+│   ├── emotion_service.py
+│   ├── router_service.py
+│   ├── web_service.py
+│   └── tts_service.py
 │
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── vite.config.js
+├── database/
+│   └── chroma_db/
 │
+├── uploads/
+│   └── documents/
 │
-├── .gitignore
-└── README.md
+└── static/
+    └── speech.wav
+│
+└── frontend/
+    ├── src/
+    ├── components/
+    ├── avatar/
+    └── ChatPanel.jsx
 ```
 
 ---
 
 # ⚙️ Installation Guide
 
-## 1. Clone Repository
+## Requirements
 
-```bash
-git clone <repository-url>
+Install:
 
-cd AI-Avatar
-```
+- Python 3.11+
+- Node.js 18+
+- Git
 
 ---
 
-# 🔹 Backend Setup
+# Backend Setup
 
-Navigate to backend:
+Go to backend folder:
 
 ```bash
 cd backend
 ```
 
-Create Python virtual environment:
+Create virtual environment:
 
 ```bash
 python -m venv venv
 ```
 
-Activate virtual environment:
+Activate environment:
 
 ### Windows
 
-```powershell
+```bash
 venv\Scripts\activate
+```
+
+### Linux / Mac
+
+```bash
+source venv/bin/activate
 ```
 
 Install dependencies:
@@ -186,31 +274,20 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
----
+Create `.env` file inside backend:
 
-## Environment Configuration
-
-Create a `.env` file inside backend:
-
-```env
-OPENAI_API_KEY=your_api_key
-
-OPENROUTER_API_KEY=your_api_key
-
-CHROMA_PATH=./chroma_db
-
-WHISPER_MODEL=base
+```
+OPENROUTER_API_KEY=your_openrouter_key
+TAVILY_API_KEY=your_tavily_key
 ```
 
----
-
-## Run Backend Server
+Start backend:
 
 ```bash
-uvicorn main:app --reload
+python -m uvicorn main:app --reload
 ```
 
-Backend will run at:
+Backend runs:
 
 ```
 http://localhost:8000
@@ -218,27 +295,29 @@ http://localhost:8000
 
 ---
 
-# 🔹 Frontend Setup
+# Frontend Setup
 
-Open another terminal:
+Open another terminal.
+
+Go to frontend:
 
 ```bash
 cd frontend
 ```
 
-Install dependencies:
+Install packages:
 
 ```bash
 npm install
 ```
 
-Start React application:
+Start frontend:
 
 ```bash
 npm run dev
 ```
 
-Frontend will run at:
+Frontend runs:
 
 ```
 http://localhost:5173
@@ -246,117 +325,126 @@ http://localhost:5173
 
 ---
 
-# 🔌 API Endpoints
+# 🔊 Piper TTS Setup
 
-## Health Check
+Download Piper TTS for your operating system.
 
-```
-GET /health
-```
-
----
-
-## Chat API
+Required files:
 
 ```
-POST /chat
+piper/
+│
+├── piper.exe
+│
+├── models/
+│   └── en_US-lessac-medium.onnx
+│
+└── espeak-ng-data/
 ```
 
-Example request:
+The backend uses Piper to generate:
 
-```json
-{
-    "message": "Hello AI"
-}
 ```
-
-Response:
-
-```json
-{
-    "response": "Hello! How can I help you?"
-}
+backend/static/speech.wav
 ```
 
 ---
 
-## Speech API
+# 🧠 ChromaDB Storage
+
+ChromaDB stores:
+
+- Conversation memory
+- Document embeddings
+
+Location:
 
 ```
-POST /speech
+backend/database/chroma_db/
 ```
 
-Function:
-
-- Accepts audio input
-- Converts speech into text
-- Sends text to AI model
-
----
-
-# 🧠 Memory Workflow
+Embedding model:
 
 ```
-User Input
-
-      ↓
-
-Convert Text Into Embedding
-
-      ↓
-
-Store In ChromaDB
-
-      ↓
-
-Search Similar Memories
-
-      ↓
-
-Send Context To LLM
-
-      ↓
-
-Generate Better Response
+all-MiniLM-L6-v2
 ```
 
 ---
 
-# 🔐 Environment Variables
+# 🔄 Complete System Flow
 
-Required variables:
-
-```env
-OPENAI_API_KEY=
-
-OPENROUTER_API_KEY=
-
-CHROMA_PATH=./chroma_db
-
-WHISPER_MODEL=base
+```
+User
+ |
+ ↓
+React Frontend
+ |
+ ↓
+FastAPI Backend
+ |
+ ├── OpenRouter LLM
+ |
+ ├── ChromaDB Memory
+ |
+ ├── Document RAG
+ |
+ ├── Web Search
+ |
+ └── Piper TTS
+          |
+          ↓
+     Speech Output
+          |
+          ↓
+      3D Avatar
 ```
 
 ---
 
-# 🚀 Future Improvements
+# 📚 RAG Pipeline
 
-- Real-time voice conversation
-- Lip synchronization
-- Facial expressions
-- Emotion detection
-- Multi-language support
-- User authentication
-- Cloud deployment
-- Mobile application support
+Document Upload:
 
+```
+PDF/DOCX
+   |
+   ↓
+Text Extraction
+   |
+   ↓
+Chunk Creation
+   |
+   ↓
+Embeddings
+   |
+   ↓
+ChromaDB
+```
+
+Question:
+
+```
+User Question
+       |
+       ↓
+Query Embedding
+       |
+       ↓
+Similarity Search
+       |
+       ↓
+Relevant Context
+       |
+       ↓
+LLM Response
+```
 ---
 
-# 👨‍💻 Contributors
+# ⚠️ Limitations
 
-AI Avatar Development Team
+- Lip-sync requires avatar models with facial morph targets.
+- Some scanned PDFs cannot extract text.
+- Avatar animation depends on available model animations.
+- Local TTS quality depends on selected Piper model.
 
 ---
-
-# 📄 License
-
-This project is created for educational and research purposes.

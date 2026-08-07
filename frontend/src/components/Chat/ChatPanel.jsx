@@ -466,13 +466,17 @@ return (
 
       <div className="chat-header">
         <div className="chat-title">
-          <span className="chat-icon">💬</span>
 
-          <div>
-            <h2>Nova AI</h2>
-            <p>Your intelligent assistant</p>
-          </div>
+        <div className="chat-icon">
+            ✦
         </div>
+
+        <div className="chat-title-text">
+            <h2>Nova AI</h2>
+            <p>Your Intelligent Assistant</p>
+        </div>
+
+</div>
 
         <div className="chat-actions">
 
@@ -480,7 +484,7 @@ return (
             className="new-chat-btn"
             onClick={startNewChat}
           >
-            ＋ New Chat
+            + New Chat
           </button>
 
           <button
@@ -520,10 +524,6 @@ return (
       key={index}
       className={`message-row ${msg.sender}`}
     >
-
-      {msg.sender === "user" && (
-        <div className="avatar-icon user-avatar"></div>
-      )}
 
       <div className="message-wrapper">
 
@@ -628,10 +628,6 @@ return (
 
       </div>
 
-      {msg.sender === "ai" && (
-        <div className="avatar-icon ai-avatar"></div>
-      )}
-
     </div>
   ))}
 
@@ -696,7 +692,11 @@ return (
           }
           title="Upload PDF / DOCX"
         >
-          {isUploading ? "Uploading..." : "📎"}
+          {isUploading ? (
+            <span className="spinner"></span>
+        ) : (
+            "📎"
+        )}
         </button>
 
         {/* Message */}
@@ -745,7 +745,7 @@ return (
           disabled={isThinking || isUploading}
           title="Send"
         >
-          ➜
+          ➤
         </button>
 
       </div>

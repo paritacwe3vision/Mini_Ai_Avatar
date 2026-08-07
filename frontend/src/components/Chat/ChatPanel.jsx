@@ -138,6 +138,12 @@ const sendMessage = async (customMessage = null) => {
     if (isThinking) return;
     const userText = customMessage || input.trim();
     if (!userText) return;
+
+    // Stop current speech immediately
+    if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+    }
   // User message
   const userMessage = {
     sender: "user",

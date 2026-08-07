@@ -475,8 +475,8 @@
 .upload-button,
 .voice-btn,
 .send-btn{
-    width:42px;
-    height:42px;
+    width:39px;
+    height:39px;
     border:none;
     border-radius:12px;
     display:flex;

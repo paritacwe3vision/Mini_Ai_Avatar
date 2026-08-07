@@ -760,8 +760,8 @@ return (
 
         <span>
           {uploadedFile
-            ? `📄 Selected: ${uploadedFile.name}`
-            : "📄 PDF Supported"}
+            ? `${uploadedFile.type === "application/pdf" ? "📕" : "📘"} Selected: ${uploadedFile.name}`
+            : "📄 PDF / DOC / DOCX Supported"}
         </span>
 
         <span>

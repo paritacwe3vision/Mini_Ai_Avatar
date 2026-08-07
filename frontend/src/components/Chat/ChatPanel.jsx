@@ -491,7 +491,7 @@ return (
             className="history-btn"
             onClick={() => setShowHistory(true)}
           >
-            🕘 History
+            History
           </button>
 
           <button

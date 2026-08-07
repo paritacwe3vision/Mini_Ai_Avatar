@@ -144,3 +144,6 @@ Thumbs.db
 
 # Ignore only generated test audio
 backend/piper/*.wav
+
+# Generated TTS audio
+backend/static/speech.wav

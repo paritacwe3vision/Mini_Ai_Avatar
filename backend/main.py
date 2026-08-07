@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from pathlib import Path
 import time
 
 from api.speech import router as speech_router
@@ -18,6 +19,10 @@ from services.web_service import search_web
 app = FastAPI(
     title="Mini AI Avatar Backend"
 )
+
+
+STATIC_DIR = Path(__file__).parent / "static"
+STATIC_DIR.mkdir(exist_ok=True)
 
 app.mount(
     "/static",

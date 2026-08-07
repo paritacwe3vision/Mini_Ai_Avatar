@@ -43,6 +43,44 @@ export default function ChatPanel() {
   const audioRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFile,setUploadedFile]=useState(null);
+
+  //------------------------------------------------
+    // Avatar Animation Helpers
+    //------------------------------------------------
+
+    const playAvatarAnimation = (emotion) => {
+
+        switch (emotion) {
+
+            case "Happy":
+                setAnimation("Happy");
+                break;
+
+            case "Sad":
+                setAnimation("Sad");
+                break;
+
+            case "Angry":
+                setAnimation("Angry");
+                break;
+
+            case "Thinking":
+                setAnimation("Thinking");
+                break;
+
+            default:
+                setAnimation("Speaking");
+                break;
+        }
+
+    };
+
+    const stopAvatarAnimation = () => {
+
+        setAnimation("Idle");
+
+    };
+
   //------------------------------------------------
   // Load History
   //------------------------------------------------
@@ -138,59 +176,77 @@ const sendMessage = async (customMessage = null) => {
     );
     
     const emotionMap = {
-      happy: "Happy",
-      sad: "Sad",
-      angry: "Angry",
-      thinking: "Thinking",
-      neutral: "Idle",
+    happy: "Happy",
+    sad: "Sad",
+    angry: "Angry",
+    thinking: "Thinking",
+    neutral: "Speaking",
     };
-    
+
     const avatarEmotion =
-      emotionMap[res.data.emotion] || "Idle";
-    
-    // ============================
+        emotionMap[(res.data.emotion || "").toLowerCase()] ||
+        "Speaking";
+        
+  // ============================
 // Play TTS Audio
 // ============================
 
 if (res.data.audio) {
 
-    // Stop previous audio if it's still playing
     if (audioRef.current) {
+
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
+
     }
 
-    // Create new audio object
-    audioRef.current = new Audio(
-        API_URL + res.data.audio
-    );
+    audioRef.current = new Audio(API_URL + res.data.audio);
 
-    // Avatar starts speaking
+   // Mute state only
+    audioRef.current.muted = isMuted;
+
+    // Start animation when audio actually starts
     audioRef.current.onplay = () => {
-        setAnimation("Speaking");
+
+        playAvatarAnimation(avatarEmotion);
+
     };
 
-    // Avatar returns to idle
+    // Stop animation when audio finishes
     audioRef.current.onended = () => {
-        setAnimation("Idle");
+
+        stopAvatarAnimation();
+
     };
 
     // Audio error
     audioRef.current.onerror = (e) => {
+
         console.error("Audio Error:", e);
+
+        stopAvatarAnimation();
+
     };
 
-    // Play only if NOT muted
-    if (!isMuted) {
+    // Play audio
+    audioRef.current.play().catch((err) => {
 
-        audioRef.current.play().catch((err) => {
-            console.error("Unable to play audio:", err);
-        });
+        console.error(err);
 
-    }
+    });
 
 }
+else {
 
+    playAvatarAnimation(avatarEmotion);
+
+    setTimeout(() => {
+
+        stopAvatarAnimation();
+
+    }, 2500);
+
+}
 // Debug
 console.log("Backend Emotion:", res.data.emotion);
 console.log("Avatar Animation:", avatarEmotion);
@@ -210,9 +266,7 @@ console.log("Avatar Animation:", avatarEmotion);
     saveConversation(finalMessages);
     
     // Play emotion animation
-    setAnimation(avatarEmotion);
-    console.log("Sending animation:", avatarEmotion);
-    
+  
     setIsThinking(false);
 
   } catch (err) {
@@ -446,19 +500,7 @@ return (
               setIsMuted(muted);
 
               if (audioRef.current) {
-
-                if (muted) {
-
-                  audioRef.current.pause();
-
-                } else {
-
-                  audioRef.current.play().catch((err) => {
-                    console.error(err);
-                  });
-
-                }
-
+                audioRef.current.muted = muted;
               }
 
             }}
@@ -694,8 +736,12 @@ return (
         {/* Send */}
 
         <button
+          type="button"
           className="send-btn"
-          onClick={sendMessage}
+          onClick={() => {
+            console.log("SEND BUTTON CLICKED");
+            sendMessage();
+          }}
           disabled={isThinking || isUploading}
           title="Send"
         >
